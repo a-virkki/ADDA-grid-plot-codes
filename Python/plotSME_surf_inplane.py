@@ -1,17 +1,19 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 # Reads ensemble-averaged scattering grids from ADDA and plots a mosaic of the
 # intensity and polarization elements to compare the effects of different physical 
-# properties such as the number of faces or material (switch on lines 180-184). 
+# properties such as the number of faces or material (switch on lines 170-174). 
 
 import numpy as np
 from matplotlib import pyplot as plt
 
-# maximum zenith angle
-Na = 89         # 39 recommended for refraction         
-iang = [2, 4, 6]
-refr = False    # refraction
+# maximum zenith angle:
+Na = 89         # 39 recommended for refraction     
+# incidence angle indices (for 20°, 40°, and 60°):    
+iang = [2,4,6]  # [0,2,4,6] may be used for the shape comparison
+# option for sub-surface scattering
+refr = False    # change to True for refraction into the subsurface
             
 def draw(inc0, ax, mn, mx):
     # Draw reference lines 
