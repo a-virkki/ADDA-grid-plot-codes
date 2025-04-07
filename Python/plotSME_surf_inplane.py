@@ -9,8 +9,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 # maximum zenith angle
-Na = 89         # 39 recommended for refraction
-iang = [0, 2, 4, 6]
+Na = 89         # 39 recommended for refraction         
+iang = [2, 4, 6]
 refr = False    # refraction
             
 def draw(inc0, ax, mn, mx):
@@ -61,7 +61,7 @@ def main(tp, col, ax2, zext):
     wx = x ** (-3.0)
     weights = simpson_nonuniform(x, wx)
     
-    for ori in range(4):        
+    for ori in range(3):        
         ScM0 = np.zeros((len(x),Nf,6)) #13213
         P1144 = np.zeros((Nf,6))
         for ix, sp in enumerate(x):
@@ -105,10 +105,7 @@ def main(tp, col, ax2, zext):
                 wP1144x = wx*ScM0[:,i,el]
                 P1144[i,el] = simpson_nonuniform(x, wP1144x) / weights
     
-        if tp == 'S':
-            valuesz = np.reshape(P1144,(Na,73,6))
-        else:
-            valuesz = np.reshape(P1144,(Na,25,6))
+        valuesz = np.reshape(P1144,(Na,25,6))
         
         if refr == True:
             valuesz = np.flip(valuesz, axis=0)
@@ -117,27 +114,19 @@ def main(tp, col, ax2, zext):
         # Polarizations
         for i in range(1,6):
             polz = valuesz[:,:,i] / valuesz[:,:,0]            
-            if tp == 'S':
-                zen = np.hstack([np.flip(polz[:,54]),polz[1:,18]])
-            else:
-                zen = np.hstack([np.flip(polz[:,0]),polz[1:,12]])
+            zen = np.hstack([np.flip(polz[:,0]),polz[1:,12]])
             
             if i == 1:                
                 ax2[i,ori].plot(angles, -zen, '-', color=col, lw=2)
             else:
                 if tp[0] == 'F':
                     ax2[i,ori].plot(angles, zen, '-', color=col, lw=2, label='%sf' % (tp[1:3]))
-                elif tp == 'S':
-                    ax2[i,ori].plot(angles, zen, '-', color=col, lw=2, label='Sph')
                 else:
                     ax2[i,ori].plot(angles, zen, '-', color=col, lw=2, label='%s.%s' % (tp[0],tp[1:3]))
             ax2[i,ori].set_ylim([-1.01,1.02])
         
         # Intensity
-        if tp == 'S':
-            zen = np.hstack([np.flip(valuesz[:,54,0]),valuesz[1:,18,0]])
-        else:
-            zen = np.hstack([np.flip(valuesz[:,0,0]),valuesz[1:,12,0]])
+        zen = np.hstack([np.flip(valuesz[:,0,0]),valuesz[1:,12,0]])
         
         mn, mx = min(zen), max(zen)    
         zext.append(0.9*mn)
@@ -149,18 +138,20 @@ def main(tp, col, ax2, zext):
 	
 if __name__ == '__main__':
     
-    fig2, ax2 = plt.subplots(nrows=6,ncols=4,sharex=True)
+    fig2, ax2 = plt.subplots(nrows=6,ncols=3,sharex=True)
+#   For shape comparison, also normal incidence can be included     
+#     fig2, ax2 = plt.subplots(nrows=6,ncols=4,sharex=True)
     fig2.subplots_adjust(top=0.96, right=0.96, left=0.08, bottom=0.1, wspace=0.26)
 
-    ax2[0,0].set_title(r'$\theta_i$: 0°', fontsize=16)
-    ax2[0,1].set_title(r'$\theta_i$: 20°', fontsize=16) 
-    ax2[0,2].set_title(r'$\theta_i$: 40°', fontsize=16)
-    ax2[0,3].set_title(r'$\theta_i$: 60°', fontsize=16)
+    #ax2[0,0].set_title(r'$\theta_i$: 0°', fontsize=16)
+    ax2[0,0].set_title(r'$\theta_i$: 20°', fontsize=16) 
+    ax2[0,1].set_title(r'$\theta_i$: 40°', fontsize=16)
+    ax2[0,2].set_title(r'$\theta_i$: 60°', fontsize=16)
 
     ax2[5,0].set_xlabel(r'$\theta_z$ [°]', fontsize=16)
     ax2[5,1].set_xlabel(r'$\theta_z$ [°]', fontsize=16) 
     ax2[5,2].set_xlabel(r'$\theta_z$ [°]', fontsize=16)
-    ax2[5,3].set_xlabel(r'$\theta_z$ [°]', fontsize=14)
+    #ax2[5,3].set_xlabel(r'$\theta_z$ [°]', fontsize=14)
 
     ax2[0,0].set_ylabel(r'$F_{11}$', fontsize=16)
     ax2[1,0].set_ylabel(r'$-F_{12}/F_{11}$', fontsize=16) 
@@ -171,7 +162,7 @@ if __name__ == '__main__':
 
     for a in ax2.flat:
         a.tick_params(axis='both',labelsize=16)
-        a.set_xlim([-Na-0.5,Na+0.5])
+        a.set_xlim([-Na,Na])
     
     zext = []
     zext = main('217i0004','k',ax2,zext)
@@ -181,11 +172,12 @@ if __name__ == '__main__':
     # zext = main('F20','r',ax2,zext)
     
     mn, mx = min(zext), max(zext)
-    for k in range(4):           
+    for k in range(3):
+#     for k in range(4):     # if normal incidence is included           
         draw(iang[k]*10,ax2[0,k], mn, mx)
         for i in range(1,6):
             draw(iang[k]*10,ax2[i,k], -1.01, 1.1)
-            ax2[0,k].set_xlim([-Na-0.5,Na+0.5])
+            ax2[0,k].set_xlim([-Na,Na])
         ax2[0,k].set_ylim([mn, mx])
 #         ax2[2,k].set_ylim([-0.05, 1.05])
     ax2[2,0].legend(loc=0, prop={'size':11})
